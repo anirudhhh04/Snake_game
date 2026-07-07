@@ -23,7 +23,7 @@ class Snake:
                 head[0] += 1
             # Screen wrapping
             head[0]%=WIDTH // CELL_SIZE
-            head[1]%=HEIGHT // CELL_SIZE
+            head[1]%=GAME_HEIGHT // CELL_SIZE
             self.body.insert(0, head)
             if not grow:
                 self.body.pop()
@@ -31,7 +31,7 @@ class Snake:
     def draw(self, screen):
         for i, block in enumerate(self.body):
             x = block[0]*CELL_SIZE
-            y = block[1]*CELL_SIZE
+            y = HUD_HEIGHT+block[1]*CELL_SIZE
             if i==0:                         # Draw Head
                 if self.direction == "UP":
                     head = self.head_up

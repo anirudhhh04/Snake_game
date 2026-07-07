@@ -18,7 +18,7 @@ class ScoreBoard:
         score = self.font.render(f"Score: {self.score}",True,TEXT_COLOR)
         high = self.font.render(f"High Score: {self.high_score}",True,TEXT_COLOR)
         screen.blit(score, (10, 10))
-        screen.blit(high, (350, 10))
+        screen.blit(high, (WIDTH-200, 10))
 
     def save(self):
         with open("highscore.txt", "w") as file:

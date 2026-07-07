@@ -6,6 +6,7 @@ from settings import *
 from scoreboard import ScoreBoard
 from game import draw_grid
 pygame.init()
+selected=0
 title_font=pygame.font.SysFont("Arial", 72, bold=True)
 menu_font=pygame.font.SysFont("Arial", 32)
 big_font=pygame.font.SysFont("Arial", 60, bold=True)
@@ -26,10 +27,15 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if game_state == "MENU":
-                if event.key == pygame.K_RETURN:
-                    game_state = "PLAYING"
-                elif event.key == pygame.K_ESCAPE:
-                    running = False
+                if event.key == pygame.K_UP:
+                    selected=(selected-1)%2
+                elif event.key == pygame.K_DOWN:
+                    selected=(selected+1)%2
+                elif event.key==pygame.K_RETURN:
+                    if selected==0:
+                        game_state="PLAYING"
+                    elif selected==1:
+                        running=False
                 continue
             if event.key == pygame.K_p and game_state=="PLAYING":
                 paused = not paused
@@ -68,14 +74,38 @@ while running:
         if snake.check_collision():
             game_state="GAME_OVER"
     screen.fill(BACKGROUND)
+    pygame.draw.rect(screen,(30, 30, 30),(0, 0, WIDTH, HUD_HEIGHT))
+    pygame.draw.line(screen,(0, 255, 0),(0, HUD_HEIGHT),(WIDTH, HUD_HEIGHT),2)
     draw_grid(screen)
-    if game_state=="MENU":
-        title=title_font.render("SNAKE GAME",True,(0, 255, 0))
-        play=menu_font.render("Press ENTER to Play",True,(255, 255, 255))
-        exit_text=menu_font.render("Press ESC to Exit",True,(255, 255, 255))
-        screen.blit(title, (70, 130))
-        screen.blit(play, (150, 280))
-        screen.blit(exit_text, (165, 340))
+    if game_state == "MENU":
+        panel = pygame.Rect(80, 60, 440, 470)
+        pygame.draw.rect(screen,(35,35,35),panel,border_radius=18)
+        pygame.draw.rect(screen,(0,220,0),panel,width=3,border_radius=18)
+        logo = pygame.transform.smoothscale(snake.head_up,(80,80))
+        screen.blit(logo,(260,75))
+        title = title_font.render("SNAKE GAME",True,(0,255,0))
+        screen.blit(title,title.get_rect(center=(WIDTH//2,180)))
+        high = menu_font.render(f"High Score : {scoreboard.high_score}",True,(255,255,0))
+        screen.blit(high,high.get_rect(center=(WIDTH//2,240)))
+        # ---------- START BUTTON ----------
+        start_rect = pygame.Rect(170,300,260,55)
+        color = (0,160,0) if selected==0 else (55,55,55)
+        pygame.draw.rect(screen,color,start_rect,border_radius=12)
+        pygame.draw.rect(screen,(255,255,255),start_rect,width=2,border_radius=12)
+
+        start = menu_font.render("START GAME",True,(255,255,255))
+        screen.blit(start,start.get_rect(center=start_rect.center))
+        # ---------- EXIT BUTTON ----------
+
+        exit_rect = pygame.Rect(170,380,260,55)
+        color = (200,40,40) if selected==1 else (55,55,55)
+        pygame.draw.rect(screen,color,exit_rect,border_radius=12)
+        pygame.draw.rect(screen,(255,255,255),exit_rect,width=2,border_radius=12)
+        exit_text = menu_font.render("EXIT",True,(255,255,255))
+        screen.blit(exit_text,exit_text.get_rect(center=exit_rect.center))
+        
+        help_text = small_font.render("↑ ↓ Select      ENTER Confirm",True,(180,180,180))
+        screen.blit(help_text,help_text.get_rect(center=(WIDTH//2,490)))
         pygame.display.update()
         clock.tick(FPS)
         continue
