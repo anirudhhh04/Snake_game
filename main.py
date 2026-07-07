@@ -6,6 +6,8 @@ from settings import *
 from scoreboard import ScoreBoard
 from game import draw_grid
 pygame.init()
+title_font=pygame.font.SysFont("Arial", 72, bold=True)
+menu_font=pygame.font.SysFont("Arial", 32)
 big_font=pygame.font.SysFont("Arial", 60, bold=True)
 small_font=pygame.font.SysFont("Arial", 28)
 pause_font=pygame.font.SysFont("Arial", 60, bold=True)
@@ -16,22 +18,29 @@ snake=Snake()
 food=Food()
 scoreboard=ScoreBoard()
 running=True
-over=False
+game_state="MENU"
 paused=False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p and not over:
+            if game_state == "MENU":
+                if event.key == pygame.K_RETURN:
+                    game_state = "PLAYING"
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
+                continue
+            if event.key == pygame.K_p and game_state=="PLAYING":
                 paused = not paused
-            if over:
+            if game_state=="GAME_OVER":
                 if event.key == pygame.K_r:
                     snake=Snake()
                     food=Food()
+                    food.randomize(snake.body)
                     scoreboard.reset()
-                    over=False
                     paused=False
+                    game_state="PLAYING"
 
                 elif event.key == pygame.K_ESCAPE:
                     running = False
@@ -49,7 +58,7 @@ while running:
 
                 elif event.key == pygame.K_RIGHT and snake.direction != "LEFT":
                     snake.direction = "RIGHT"
-    if not over and not paused:
+    if game_state=="PLAYING" and not paused:
         grow=False
         if snake.body[0] == food.position:
             scoreboard.increase()
@@ -57,13 +66,23 @@ while running:
             grow=True
         snake.move(grow)
         if snake.check_collision():
-            over=True
+            game_state="GAME_OVER"
     screen.fill(BACKGROUND)
     draw_grid(screen)
+    if game_state=="MENU":
+        title=title_font.render("SNAKE GAME",True,(0, 255, 0))
+        play=menu_font.render("Press ENTER to Play",True,(255, 255, 255))
+        exit_text=menu_font.render("Press ESC to Exit",True,(255, 255, 255))
+        screen.blit(title, (70, 130))
+        screen.blit(play, (150, 280))
+        screen.blit(exit_text, (165, 340))
+        pygame.display.update()
+        clock.tick(FPS)
+        continue
     food.draw(screen)
     snake.draw(screen)
     scoreboard.draw(screen)
-    if over:
+    if game_state=="GAME_OVER":
         game_text = big_font.render("GAME OVER", True, (255, 60, 60))
         restart_text = small_font.render("Press R to Restart", True, (255, 255, 255))
         quit_text = small_font.render("Press ESC to Quit", True, (255, 255, 255))
